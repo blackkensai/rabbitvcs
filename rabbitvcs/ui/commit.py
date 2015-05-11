@@ -230,7 +230,20 @@ class Commit(InterfaceView, GtkContextMenuCaller):
     # Event handlers
     #
     def on_refresh_clicked(self, widget):
-        self.initialize_items()        
+        self.initialize_items()
+
+    def on_activate_selection_clicked(self, widget):
+        to_status = False
+        for index in self.files_table.get_selected_rows():
+            row = self.files_table.get_row(index)
+            if not row[0]:
+                to_status = True
+        for index in self.files_table.get_selected_rows():
+            # print(row)
+            # print(type(row))
+            row = self.files_table.get_row(index)
+            row[0] = to_status
+            self.changes[row[1]] = to_status
 
     def on_key_pressed(self, widget, data):
         if InterfaceView.on_key_pressed(self, widget, data):
