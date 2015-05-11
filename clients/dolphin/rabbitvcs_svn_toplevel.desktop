@@ -4,8 +4,21 @@ ServiceTypes=KonqPopupMenu/Plugin,inode/directory,all/all,all/allfiles
 X-KDE-Priority=TopLevel
 
 X-KDE-GetActionMenu=org.kde.kded getTopLevelActionMenu
-Actions=Log;
+Actions=Update;Commit;Log;
 
+[Desktop Action Update]
+Name=Update...
+Name[de]=Update...
+
+Icon=/usr/share/icons/hicolor/scalable/actions/rabbitvcs-update.svg
+Exec=rabbitvcs update %U
+
+[Desktop Action Commit]
+Name=Commit...
+Name[de]=Committe...
+
+Icon=/usr/share/icons/hicolor/scalable/actions/rabbitvcs-commit.svg
+Exec=rabbitvcs commit %U
 
 [Desktop Action Log]
 Name=Subversion Log (RabbitVCS)
