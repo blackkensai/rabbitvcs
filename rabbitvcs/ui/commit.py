@@ -27,6 +27,7 @@ import pygtk
 import gobject
 import gtk
 from time import sleep
+from fnmatch import fnmatch
 
 from rabbitvcs.ui import InterfaceView
 from rabbitvcs.util.contextmenu import GtkFilesContextMenu, GtkContextMenuCaller
@@ -70,10 +71,15 @@ class Commit(InterfaceView, GtkContextMenuCaller):
         """
         InterfaceView.__init__(self, "commit", "Commit")
 
+        # TODO read from settings
+        self.ignore_file_name = '.rabbitignore'
+        self.local_ignore_files_pattern = []
+
         self.isInitDone = False
         self.base_dir = base_dir
         self.vcs = rabbitvcs.vcs.VCS()
         self.items = []
+        self.hide_local_ignore_files = False
 
         self.files_table = rabbitvcs.ui.widget.Table(
             self.get_widget("files_table"),
@@ -130,6 +136,7 @@ class Commit(InterfaceView, GtkContextMenuCaller):
         gtk.gdk.threads_leave()
 
         self.items = self.vcs.get_items(self.paths, self.vcs.statuses_for_commit(self.paths))
+        self.load_ignore_patterns()
 
         gtk.gdk.threads_enter()
         self.populate_files_table()
@@ -151,12 +158,51 @@ class Commit(InterfaceView, GtkContextMenuCaller):
 
         return False
 
+    def load_ignore_patterns(self):
+        test_directory = self.base_dir
+        found_ignore_file = False
+        ignore_file = None
+        while not found_ignore_file:
+            ignore_file = os.path.join(test_directory, self.ignore_file_name)
+            if os.path.exists(ignore_file):
+                found_ignore_file = True
+                break
+            if test_directory == os.path.dirname(test_directory):
+                break
+            test_directory = os.path.dirname(test_directory)
+        if not found_ignore_file:
+            ignore_file = os.path.join(os.environ['HOME'], '.config/rabbitvcs',self.ignore_file_name)
+            if os.path.exists(ignore_file):
+                found_ignore_file = True
+        if not found_ignore_file:
+            return True
+
+        fh = open(ignore_file)
+        self.local_ignore_files_pattern = []
+        while True:
+            pattern = fh.readline().strip()
+            if len(pattern) == 0:
+                break
+            self.local_ignore_files_pattern.append(pattern)
+        print(self.local_ignore_files_pattern)
+
+    def test_item_visible_by_ignore_file(self, item):
+        if self.hide_local_ignore_files:
+            for pattern in self.local_ignore_files_pattern:
+                for path_part in item.path.split('/'):
+                    if fnmatch(path_part, pattern):
+                        return False
+        return True
+
     def should_item_be_visible(self, item):
         show_unversioned = self.SHOW_UNVERSIONED
         
         if not show_unversioned:
             if not item.is_versioned():
                return False
+
+        if not self.test_item_visible_by_ignore_file(item):
+            return False
        
         return True
 
@@ -215,6 +261,13 @@ class Commit(InterfaceView, GtkContextMenuCaller):
                 self.SHOW_UNVERSIONED
             )
             self.SETTINGS.write()
+
+    def on_toggle_hide_local_ignore_files_toggled(self, widget, data=None):
+        '''Hide files like .project,target,*.o'''
+        print('on_toggle_hide_local_ignore_files_toggled')
+        self.hide_local_ignore_files = not self.hide_local_ignore_files
+        self.populate_files_table()
+        pass
 
     def on_files_table_row_activated(self, treeview, event, col):
         paths = self.files_table.get_selected_row_items(1)
