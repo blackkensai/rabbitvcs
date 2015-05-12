@@ -4,7 +4,7 @@ ServiceTypes=KonqPopupMenu/Plugin,inode/directory
 X-KDE-Submenu=Subversion (RabbitVCS)
 
 X-KDE-GetActionMenu=org.kde.kded getActionMenu
-Actions=Log;Annotate;Add;ApplyPatch;CompareChanges;BranchTag;Browser;CheckMods;Checkout;Clean;Commit;CreatePatch;Create;Diff;
+Actions=Log;Annotate;Add;ApplyPatch;CompareChanges;BranchTag;Browser;CheckMods;Checkout;Cleanup;Commit;CreatePatch;Create;Diff;
 
 [Desktop Action Log]
 Name=Show log
@@ -80,12 +80,12 @@ Exec=rabbitvcs checkout %U
 
 
 
-[Desktop Action Clean]
-Name=Clean...
+[Desktop Action Cleanup]
+Name=Cleanup...
 Name[de]=Raeume auf...
 
 Icon=/usr/share/icons/hicolor/scalable/actions/rabbitvcs-cleanup.svg
-Exec=rabbitvcs clean %U
+Exec=rabbitvcs cleanup %U
 
 
 
@@ -118,8 +118,8 @@ Exec=rabbitvcs create --vcs=svn %U
 
 
 [Desktop Action Diff]
-Name=Zeige Unterschiede
-Name[de]=Show differences
+Name=Show differences
+Name[de]=Zeige Unterschiede
 
 Icon=/usr/share/icons/hicolor/scalable/actions/rabbitvcs-diff.svg
 Exec=rabbitvcs diff -s %U
